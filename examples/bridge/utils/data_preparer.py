@@ -1,4 +1,4 @@
-"""Data preparation utilities for TL-SQL pipelines """
+"""Data preparation utilities for TLSQL pipelines"""
 
 from typing import Dict
 
@@ -39,9 +39,3 @@ def remove_overlap_rows(
     ]
 
     return df_to_remove_from[mask].reset_index(drop=True)
-
-
-
-
-
-

@@ -1,67 +1,109 @@
-"""TL-SQL: A SQL conversion library for custom SQL statements
+"""TLSQL: A SQL conversion library for custom SQL statements
 
 This package converts three types of custom SQL statements into standard SQL:
 1. TRAIN WITH - Training data queries
-2. PREDICT VALUE - Prediction target queries 
-3. VALIDATE WITH - Validation data queries 
+2. PREDICT VALUE - Prediction target queries
+3. VALIDATE WITH - Validation data queries
 
-Core API:
-    from tl_sql import Parser, SQLGenerator
-    from tl_sql.executor import TlSqlPipeline, DatabaseExecutor, DatabaseConfig
-    
-    # Parse TL-SQL 
-    parser = Parser("PREDICT VALUE(users.Age, CLF) FROM users")
-    ast = parser.parse()
-    
-    # Generate SQL 
-    generator = SQLGenerator()
-    result = generator.generate(ast)
-    pipeline = TlSqlPipeline(db_config)
-    result = pipeline.run(train_sql, predict_sql, validate_sql)
+Usage:
+    Basic usage:
+        >>> import tlsql
+        >>> result = tlsql.convert("PREDICT VALUE(users.Age, CLF) FROM users")
+        >>> print(result.statement_type)
+        'PREDICT'
 
-
+    Advanced usage:
+        >>> from tlsql import Parser, SQLGenerator
+        >>> parser = Parser("PREDICT VALUE(users.Age, CLF) FROM users")
+        >>> ast = parser.parse()
 """
 
 __version__ = "0.1.0"
-__author__ = "TL-SQL Team"
+__author__ = "TLSQL Team"
 
-# Core language components
-from tl_sql.core.lexer import Lexer
-from tl_sql.core.parser import Parser
-from tl_sql.core.exceptions import (
-    MLSQLError,
+
+def convert(tlsql: str):
+    """Convert TLSQL statement to standard SQL
+
+    This is the main entry point for TLSQL conversion.
+
+    Args:
+        tlsql: TLSQL statement string
+
+    Returns:
+        ConversionResult: Unified result containing statement type and all metadata
+
+    """
+    from tlsql.tlsql.sql_generator import SQLGenerator
+    return SQLGenerator.convert(tlsql)
+
+
+# Core classes (re-exported for convenience)
+from tlsql.tlsql.lexer import Lexer
+from tlsql.tlsql.parser import Parser
+from tlsql.tlsql.sql_generator import (
+    SQLGenerator,
+    GeneratedSQL,
+    FilterCondition,
+    ConversionResult,
+)
+
+# AST nodes (commonly used)
+from tlsql.tlsql.ast_nodes import (
+    Statement,
+    TrainStatement,
+    ValidateStatement,
+    PredictStatement,
+    ValueClause,
+    FromClause,
+    WhereClause,
+    BinaryExpr,
+    UnaryExpr,
+    ColumnExpr,
+    LiteralExpr,
+    BetweenExpr,
+    InExpr,
+    ColumnReference,
+    PredictType,
+)
+
+# Exceptions
+from tlsql.tlsql.exceptions import (
+    TLSQLError,
     LexerError,
     ParseError,
-    ValidationError,
+    GenerationError,
 )
-
-# Executor components 
-from tl_sql.executor import (
-    SQLGenerator,
-    DatabaseExecutor,
-    DatabaseConfig,
-    ExecutionResult,
-    TlSqlPipeline,  
-    PipelineResult,
-)
-
 
 __all__ = [
-    # Core Language 
+    # Top-level API
+    "convert",
+    # Core classes
     "Lexer",
     "Parser",
-    # Exceptions 
-    "MLSQLError",
+    "SQLGenerator",
+    "GeneratedSQL",
+    "FilterCondition",
+    "ConversionResult",
+    # AST nodes
+    "Statement",
+    "TrainStatement",
+    "ValidateStatement",
+    "PredictStatement",
+    "ValueClause",
+    "FromClause",
+    "WhereClause",
+    "BinaryExpr",
+    "UnaryExpr",
+    "ColumnExpr",
+    "LiteralExpr",
+    "BetweenExpr",
+    "InExpr",
+    "ColumnReference",
+    "PredictType",
+    # Exceptions
+    "TLSQLError",
     "LexerError",
     "ParseError",
-    "ValidationError",
-    # Executor 
-    "SQLGenerator",
-    "DatabaseExecutor",
-    "DatabaseConfig",
-    "ExecutionResult",
-    "TlSqlPipeline",  
-    "PipelineResult",
+    "GenerationError",
 ]
-
-

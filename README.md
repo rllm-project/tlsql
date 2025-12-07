@@ -1,21 +1,34 @@
-# TL-SQL: Design SQL-like API for Table learning
+<div align="center">
 
-TL-SQL is a Python library that converts custom SQL-like statements into standard SQL queries for machine learning workflows. TL-SQL supports three types of statements for machine learning workflows. Each statement has a specific syntax and purpose.
+# <font color="#0194E2">TL</font><font color="#19E1C3">SQL</font>
+
+###  Design SQL-like API for Table Learning 
+
+*A Python library that converts custom SQL-like statements into standard SQL queries for machine learning workflows*
+
+<br/>
+
+[![Python](https://img.shields.io/badge/Python-3.8+-3776ab?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
+
+---
+
+</div>
+
+## About
+
+TLSQL is a Python library that converts custom SQL-like statements into standard SQL queries for machine learning workflows. TLSQL supports three types of statements for machine learning workflows. Each statement has a specific syntax and purpose.
 
 ## Dataset Splitting
 
-TL-SQL uses three statements to divide your dataset into training, validation, and test sets:
+TLSQL uses three statements to divide your dataset into training, validation, and test sets:
 
 - **`TRAIN WITH`**: Specifies the **training set** - data used to train the model
 - **`PREDICT VALUE`**: Specifies the **test set** - data used for final evaluation (prediction targets)
 - **`VALIDATE WITH`**: Specifies the **validation set** - data used for model selection and hyperparameter tuning
 
-While both `train_sql` and `validate_sql` can be `None`:
 
-- **`train_sql = None`**: Uses all data from target table (excluding PREDICT data) as training data
-- **`validate_sql = None`**: Uses k-fold cross-validation on training data
-
-## TL-SQL Syntax
+## TLSQL Syntax
 
 ### 1. TRAIN WITH Statement
 
@@ -94,32 +107,3 @@ WHERE users.Gender='M' AND movies.Year < 2000
 - `IN (value1, value2, ...)`: Check if value is in list
 - `BETWEEN value1 AND value2`: Range check
 
-
-## Project Structure
-
-```
-tl_sql/
-├── core/                    # Core language components
-│   ├── lexer.py            # Tokenizer for TL-SQL
-│   ├── parser.py            # Parser for TL-SQL syntax
-│   ├── ast_nodes.py         # Abstract Syntax Tree nodes
-│   ├── tokens.py            # Token definitions
-│   └── exceptions.py        # Custom exceptions
-│
-├── executor/                # SQL execution components
-│   ├── sql_generator.py     # Converts AST to SQL
-│   ├── db_executor.py       # Database connection and execution
-│   └── pipeline.py          #  pipeline interface
-│
-├── config/                  # Configuration utilities
-│   ├── __init__.py         # Config loading functions
-│   └── dataset_config.json # Dataset configuration
-│
-├── examples/                # Example scripts
-│   ├── sql_conversion.py    # SQL conversion demo
-│   ├── bridge_demo.py       # BRIDGE model demo
-│   ├── train_with_tl_sql.py # Training utilities
-│   └── bridge/             # BRIDGE model utilities
-│       └── utils/          # Helper functions
-
-```

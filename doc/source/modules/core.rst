@@ -1,51 +1,21 @@
 Core Module
 ===========
 
-The core module contains lexer, parser, and AST node definitions.
+The core module contains all essential components for parsing and converting TLSQL statements.
 
-.. automodule:: tl_sql.core
-   :members:
-   :undoc-members:
-   :show-inheritance:
-   :exclude-members: MLSQLError, LexerError, ParseError, ValidationError
+The following sections document each component in detail. Click on any component to view its full documentation.
 
-Lexer
------
-
-.. automodule:: tl_sql.core.lexer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Parser
-------
-
-.. automodule:: tl_sql.core.parser
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-AST Nodes
----------
-
-.. automodule:: tl_sql.core.ast_nodes
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Tokens
-------
-
-.. automodule:: tl_sql.core.tokens
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Exceptions
+Components
 ----------
 
-.. automodule:: tl_sql.core.exceptions
-   :members:
-   :undoc-members:
-   :show-inheritance:
+.. toctree::
+   :maxdepth: 2
+   :caption: Core Components
+
+   core/lexer
+   core/parser
+   core/sql_generator
+   core/ast_nodes
+   core/tokens
+   core/exceptions
 

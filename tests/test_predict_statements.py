@@ -2,17 +2,12 @@
 """
 
 import sys
-import os
 
-# Add project root to path
-current_dir = os.path.dirname(os.path.abspath(__file__))
-tl_sql_dir = os.path.dirname(current_dir)
-project_root = os.path.dirname(tl_sql_dir)
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+sys.path.append("./")
+sys.path.append("../")
+sys.path.append("../../")
 
-from tl_sql.core.parser import Parser
-from tl_sql.executor.sql_generator import SQLGenerator
+from tlsql import Parser, SQLGenerator
 
 
 def print_test_header(test_name: str):
@@ -20,11 +15,10 @@ def print_test_header(test_name: str):
     print(f"Test: {test_name}")
 
 
-
 def test_predict_basic():
     """Test basic PREDICT statements"""
     print_test_header("Basic PREDICT Statements")
-    
+
     test_cases = [
         {
             "name": "Simple classification",
@@ -43,30 +37,30 @@ def test_predict_basic():
             "sql": "PREDICT VALUE(users.Age, CLF) FROM users",
         },
     ]
-    
+
     for test_case in test_cases:
         print(f"\n--- {test_case['name']} ---")
         print(f"SQL: {test_case['sql']}")
         try:
             parser = Parser(test_case['sql'])
             ast = parser.parse()
-            
+
             if not ast.predict:
                 print("  [FAILED] Not a PREDICT statement")
                 continue
-            
+
             predict = ast.predict
-            print(f"  [SUCCESS] Parsed successfully")
+            print("  [SUCCESS] Parsed successfully")
             print(f"  Target: {predict.value.target.table}.{predict.value.target.column}")
             print(f"  Task type: {predict.value.predict_type.type_name}")
             print(f"  Table: {predict.from_table.table}")
             print(f"  Has WHERE: {predict.where is not None}")
-            
+
             # Test SQL generation
             generator = SQLGenerator()
             filter_cond = generator.generate_predict_filter(predict)
             print(f"  Generated condition: {filter_cond.condition}")
-            
+
         except Exception as e:
             print(f"  [FAILED] {e}")
             import traceback
@@ -76,7 +70,7 @@ def test_predict_basic():
 def test_predict_where_conditions():
     """Test PREDICT with various WHERE conditions"""
     print_test_header("PREDICT with Various WHERE Conditions")
-    
+
     test_cases = [
         {
             "name": "Simple equality",
@@ -104,7 +98,10 @@ def test_predict_where_conditions():
         },
         {
             "name": "Complex AND/OR",
-            "sql": "PREDICT VALUE(users.Age, CLF) FROM users WHERE users.Gender='M' AND (users.Age > 25 OR users.Occupation = 1)",
+            "sql": (
+                "PREDICT VALUE(users.Age, CLF) FROM users "
+                "WHERE users.Gender='M' AND (users.Age > 25 OR users.Occupation = 1)"
+            ),
         },
         {
             "name": "BETWEEN",
@@ -120,30 +117,34 @@ def test_predict_where_conditions():
         },
         {
             "name": "Multiple conditions",
-            "sql": "PREDICT VALUE(users.Age, CLF) FROM users WHERE users.Gender='M' AND users.Age > 25 AND users.Occupation IN (1, 2, 3)",
+            "sql": (
+                "PREDICT VALUE(users.Age, CLF) FROM users "
+                "WHERE users.Gender='M' AND users.Age > 25 "
+                "AND users.Occupation IN (1, 2, 3)"
+            ),
         },
     ]
-    
+
     for test_case in test_cases:
         print(f"\n--- {test_case['name']} ---")
         print(f"SQL: {test_case['sql']}")
         try:
             parser = Parser(test_case['sql'])
             ast = parser.parse()
-            
+
             if not ast.predict:
                 print("  [FAILED] Not a PREDICT statement")
                 continue
-            
+
             predict = ast.predict
-            
+
             # Test SQL generation
             generator = SQLGenerator()
             filter_cond = generator.generate_predict_filter(predict)
-            
-            print(f"  [SUCCESS] Parsed and generated")
+
+            print("  [SUCCESS] Parsed and generated")
             print(f"  SQL Condition: {filter_cond.condition}")
-            
+
         except Exception as e:
             print(f"  [FAILED] {e}")
             import traceback
@@ -153,7 +154,7 @@ def test_predict_where_conditions():
 def test_predict_column_references():
     """Test PREDICT with different column reference formats"""
     print_test_header("PREDICT with Different Column References")
-    
+
     test_cases = [
         {
             "name": "Table.Column format",
@@ -168,30 +169,32 @@ def test_predict_column_references():
             "sql": "PREDICT VALUE(users.Age, CLF) FROM users WHERE Gender='M' AND users.Occupation > 1",
         },
     ]
-    
     for test_case in test_cases:
         print(f"\n--- {test_case['name']} ---")
         print(f"SQL: {test_case['sql']}")
         try:
             parser = Parser(test_case['sql'])
             ast = parser.parse()
-            
+
             if not ast.predict:
                 print("  [FAILED] Not a PREDICT statement")
                 continue
-            
+
             predict = ast.predict
             target = predict.value.target
-            
-            print(f"  [SUCCESS] Parsed successfully")
-            print(f"  Target table: {target.table if target.table else 'None (defaults to FROM table)'}")
+
+            print("  [SUCCESS] Parsed successfully")
+            target_table_str = (
+                target.table if target.table else 'None (defaults to FROM table)'
+            )
+            print(f"  Target table: {target_table_str}")
             print(f"  Target column: {target.column}")
-            
+
             # Test SQL generation
             generator = SQLGenerator()
             filter_cond = generator.generate_predict_filter(predict)
             print(f"  Generated condition: {filter_cond.condition}")
-            
+
         except Exception as e:
             print(f"  [FAILED] {e}")
             import traceback
@@ -201,7 +204,7 @@ def test_predict_column_references():
 def test_predict_task_types():
     """Test PREDICT with different task types"""
     print_test_header("PREDICT with Different Task Types")
-    
+
     test_cases = [
         {
             "name": "Classification (CLF)",
@@ -212,26 +215,26 @@ def test_predict_task_types():
             "sql": "PREDICT VALUE(users.Age, REG) FROM users WHERE users.Gender='M'",
         },
     ]
-    
+
     for test_case in test_cases:
         print(f"\n--- {test_case['name']} ---")
         print(f"SQL: {test_case['sql']}")
         try:
             parser = Parser(test_case['sql'])
             ast = parser.parse()
-            
+
             if not ast.predict:
                 print("  [FAILED] Not a PREDICT statement")
                 continue
-            
+
             predict = ast.predict
             predict_type = predict.value.predict_type
-            
-            print(f"  [SUCCESS] Parsed successfully")
+
+            print("  [SUCCESS] Parsed successfully")
             print(f"  Task type: {predict_type.type_name}")
             print(f"  Is classifier: {predict_type.is_classifier}")
             print(f"  Is regressor: {predict_type.is_regressor}")
-            
+
         except Exception as e:
             print(f"  [FAILED] {e}")
             import traceback
@@ -241,7 +244,7 @@ def test_predict_task_types():
 def test_predict_edge_cases():
     """Test PREDICT edge cases and error handling"""
     print_test_header("PREDICT Edge Cases")
-    
+
     test_cases = [
         {
             "name": "No WHERE clause",
@@ -255,12 +258,20 @@ def test_predict_edge_cases():
         },
         {
             "name": "Nested parentheses",
-            "sql": "PREDICT VALUE(users.Age, CLF) FROM users WHERE (users.Gender='M' AND users.Age > 25) OR users.Occupation = 1",
+            "sql": (
+                "PREDICT VALUE(users.Age, CLF) FROM users "
+                "WHERE (users.Gender='M' AND users.Age > 25) "
+                "OR users.Occupation = 1"
+            ),
             "should_pass": True,
         },
         {
             "name": "Multiple IN clauses",
-            "sql": "PREDICT VALUE(users.Age, CLF) FROM users WHERE users.Occupation IN (1, 2, 3) AND users.Age IN (25, 30, 35)",
+            "sql": (
+                "PREDICT VALUE(users.Age, CLF) FROM users "
+                "WHERE users.Occupation IN (1, 2, 3) "
+                "AND users.Age IN (25, 30, 35)"
+            ),
             "should_pass": True,
         },
         {
@@ -269,36 +280,36 @@ def test_predict_edge_cases():
             "should_pass": True,
         },
     ]
-    
+
     for test_case in test_cases:
         print(f"\n--- {test_case['name']} ---")
         print(f"SQL: {test_case['sql']}")
         print(f"Expected: {'PASS' if test_case['should_pass'] else 'FAIL'}")
-        
+
         try:
             parser = Parser(test_case['sql'])
             ast = parser.parse()
-            
+
             if not ast.predict:
                 if test_case['should_pass']:
                     print("  [FAILED] Not a PREDICT statement")
                 else:
                     print("  [EXPECTED FAIL] Correctly rejected")
                 continue
-            
+
             if not test_case['should_pass']:
                 print("  [UNEXPECTED PASS] Should have failed but passed")
                 continue
-            
+
             predict = ast.predict
-            
+
             # Test SQL generation
             generator = SQLGenerator()
             filter_cond = generator.generate_predict_filter(predict)
-            
-            print(f"  [SUCCESS] Parsed and generated")
+
+            print("  [SUCCESS] Parsed and generated")
             print(f"  Condition: {filter_cond.condition}")
-            
+
         except Exception as e:
             if test_case['should_pass']:
                 print(f"  [FAILED] {e}")
@@ -308,21 +319,16 @@ def test_predict_edge_cases():
                 print(f"  [EXPECTED FAIL] {e}")
 
 
-
-
 def run_all_tests():
     """Run all PREDICT statement tests"""
     print("PREDICT Statement Tests")
-    
+
     # test_predict_basic()
     # test_predict_where_conditions()
     # test_predict_column_references()
     # test_predict_task_types()
     test_predict_edge_cases()
 
-    
-
 
 if __name__ == "__main__":
     run_all_tests()
-

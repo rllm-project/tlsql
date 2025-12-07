@@ -1,12 +1,9 @@
-"""Utility functions for graph construction 
+"""Utility functions for graph construction
 
 This module contains utility functions for building graphs from relational data.
 """
 
-from typing import Optional
-
 import pandas as pd
-import numpy as np
 import torch
 from torch import Tensor
 
@@ -19,21 +16,21 @@ def reorder_ids(
     tgt_col_name: str,
     n_src: int,
 ) -> pd.DataFrame:
-    """Reorder IDs in the relationship DataFrame 
-    
+    """Reorder IDs in the relationship DataFrame
+
     Reorders the IDs in the relationship DataFrame by adjusting the
     original source IDs and target column IDs.
-    
+
     Args:
-        relation_df: DataFrame containing the relationships 
-        src_col_name: Name of the source column in the DataFrame 
-        tgt_col_name: Name of the target column in the DataFrame 
-        n_src: Number of source nodes 
-        
+        relation_df: DataFrame containing the relationships
+        src_col_name: Name of the source column in the DataFrame
+        tgt_col_name: Name of the target column in the DataFrame
+        n_src: Number of source nodes
+
     Returns:
-        DataFrame with reordered IDs 
+        DataFrame with reordered IDs
     """
-    # Making relationship 
+    # Making relationship
     ordered_rating = relation_df.assign(
         **{
             src_col_name: relation_df[src_col_name] - 1,
@@ -65,8 +62,3 @@ def build_homo_graph(
 
     graph = GraphData(x=x, y=y, adj=adj)
     return graph
-
-
-
-
-

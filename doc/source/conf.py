@@ -13,15 +13,15 @@
 import os
 import sys
 
-# Add the project root to the path so we can import tl_sql
+# Add the project root to the path so we can import tlsql
 sys.path.insert(0, os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath('../../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'TL-SQL'
-copyright = '2024, TL-SQL Team'
-author = 'TL-SQL Team'
+project = 'TLSQL'
+copyright = '2024, TLSQL Team'
+author = 'TLSQL Team'
 version = '0.1.0'
 release = '0.1.0'
 
@@ -31,14 +31,14 @@ release = '0.1.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',        # 自动从代码注释生成文档
-    'sphinx.ext.autosummary',     # 自动生成摘要
-    'sphinx.ext.viewcode',        # 添加源代码链接
-    'sphinx.ext.napoleon',        # 支持 Google/NumPy 风格的 docstring
-    'sphinx.ext.intersphinx',    # 链接到其他项目文档
-    'sphinx.ext.todo',            # 支持 TODO 注释
-    'sphinx.ext.coverage',        # 文档覆盖率
-    'sphinx.ext.mathjax',         # 数学公式支持
+    'sphinx.ext.autodoc',        # Automatically generate docs from code comments
+    'sphinx.ext.autosummary',    # Automatically generate summaries
+    'sphinx.ext.viewcode',       # Add source code links
+    'sphinx.ext.napoleon',       # Support Google/NumPy style docstrings
+    'sphinx.ext.intersphinx',    # Link to other project docs
+    'sphinx.ext.todo',           # Support TODO comments
+    'sphinx.ext.coverage',       # Documentation coverage
+    'sphinx.ext.mathjax',        # Math formula support
 ]
 
 # Napoleon settings for docstring parsing
@@ -59,17 +59,21 @@ napoleon_attr_annotations = True
 
 # Autodoc settings
 autodoc_default_options = {
-    'members': True,
+    'members': False,  # Don't show members in sidebar, only show class names
     'member-order': 'bysource',
-    'special-members': '__init__',
+    'special-members': False,  # Don't show special members
     'undoc-members': False,
     'exclude-members': '__weakref__',
-    'show-inheritance': True,
+    'show-inheritance': False,  # Don't show inheritance in sidebar
+    'imported-members': False,  # Don't document imported members to avoid duplicates
 }
 
 # Autosummary settings
-autosummary_generate = True
-autosummary_imported_members = True
+autosummary_generate = False  # Disable autosummary to reduce clutter in sidebar
+autosummary_imported_members = False  # Don't document imported members to avoid duplicates
+
+# Hide module names in class/function signatures
+add_module_names = False  # Don't show module names in class/function titles
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -81,6 +85,13 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # Mock imports for modules that may not be available during documentation build
 autodoc_mock_imports = []
+
+# Intersphinx mapping for external documentation
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'sqlalchemy': ('https://docs.sqlalchemy.org/en/20/', None),
+    'pandas': ('https://pandas.pydata.org/docs/', None),
+}
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -104,4 +115,3 @@ html_static_path = ['_static']
 
 # Use default furo sidebar (no custom templates needed)
 # html_sidebars = {}  # Use default sidebar configuration
-
