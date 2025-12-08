@@ -1,5 +1,5 @@
-TLSQL to SQL Conversion
-========================
+Conversion
+==========
 
 This section shows the conversion process of a TLSQL statement to standard SQL, using a PREDICT VALUE statement as an example.
 
@@ -42,7 +42,7 @@ The conversion process consists of four main steps:
    - ``users`` (identifier)
    - ``.`` (dot)
    - ``Gender`` (identifier)
-   ...
+   - ``...`` (more tokens)
 
 2. **Syntax Analysis (Parsing)**
    

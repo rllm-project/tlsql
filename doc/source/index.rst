@@ -13,7 +13,7 @@ TLSQL uses three statements to divide your dataset into training, validation, an
 - **VALIDATE WITH**: Specifies the validation set
 
 TLSQL Syntax
------------
+------------
 
 1. TRAIN WITH Statement
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,9 +84,6 @@ The ``VALIDATE WITH`` statement specifies validation data with the same syntax a
     FROM Tables(users, movies, ratings)
     WHERE users.Gender='M' AND movies.Year < 2000
 
-Supported Operators
--------------------
-
 
 
 Quick Start
@@ -106,7 +103,7 @@ Contents
 
 .. toctree::
    :maxdepth: 2
-   :caption: Conversion Details
+   :caption: Conversion
 
    conversion
 

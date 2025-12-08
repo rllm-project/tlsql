@@ -3,12 +3,6 @@
 This example demonstrates how TLSQL statements are converted to standard SQL.
 """
 
-import sys
-
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-
 import tlsql
 
 
@@ -39,8 +33,9 @@ def test():
 
     predict_sql = """
     PREDICT VALUE(users.Age, CLF)
-    FROM users
-    WHERE users.Gender = 'M' AND users.Occupation IN (1,2,4)
+FROM users
+WHERE users.Gender='F' 
+
     """
 
     print("TLSQL:")

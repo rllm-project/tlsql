@@ -7,12 +7,6 @@ This example demonstrates how to use TLSQL to train a BRIDGE model.
 import argparse
 import numpy as np
 import torch
-import sys
-
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
-
 from tlsql.examples.bridge.train_with_tlsql import (
     prepare_data_from_tlsql,
     build_bridge_model,

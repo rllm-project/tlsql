@@ -8,17 +8,12 @@ Note: This module requires the rllm package to be available.
 import time
 import argparse
 import numpy as np
-import sys
 from sklearn.model_selection import KFold
 from typing import Optional
 
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
-
-sys.path.append("./")
-sys.path.append("../")
-sys.path.append("../../")
 
 from rllm.nn.conv.graph_conv import GCNConv
 from rllm.nn.conv.table_conv import TabTransformerConv
