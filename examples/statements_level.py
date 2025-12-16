@@ -35,7 +35,7 @@ def level_II():
     """
 
     train_sql = """
-    TRAIN WITH (users.*, movies.title, ratings.*)
+    TRAIN WITH (users.*, movies.*, ratings.*)
     FROM users, movies, ratings
     WHERE users.Gender='M' and users.userID BETWEEN 1 AND 3000
     """
@@ -62,14 +62,14 @@ def level_III():
     """
 
     train_sql = """
-    TRAIN WITH (users.*, movies.title, ratings.*)
+    TRAIN WITH (users.*, movies.*, ratings.*)
     FROM users, movies, ratings
     WHERE users.Gender='M' and users.userID BETWEEN 1 AND 3000
     """
 
     validate_sql = """
-    VALIDATE WITH (users.*, movies.*)
-    FROM users, movies
+    VALIDATE WITH (users.*)
+    FROM users
     WHERE users.Gender='M' and users.userID>3000
     """
 

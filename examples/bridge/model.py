@@ -31,3 +31,4 @@ def build_bridge_model(num_classes, metadata, emb_size):
         graph_encoder=g_encoder,
     )
     return model
+
