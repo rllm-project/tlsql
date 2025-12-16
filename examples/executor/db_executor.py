@@ -86,7 +86,6 @@ class DatabaseExecutor:
     def __exit__(self, exc_type, exc_value, traceback):
         """Context manager exit"""
         self.disconnect()
-        # Propagate exceptions
         return False
 
     def _validate_dependencies(self):
@@ -101,7 +100,6 @@ class DatabaseExecutor:
         """Establish database connection"""
         try:
             if self.config.db_type == 'mysql':
-                # Use SQLAlchemy for MySQL
                 connection_string = (
                     f"mysql+pymysql://{self.config.username}:{self.config.password}"
                     f"@{self.config.host}:{self.config.port or 3306}/{self.config.database}"
@@ -138,7 +136,6 @@ class DatabaseExecutor:
         start_time = time.time()
 
         try:
-            # Execute query
             logger.info(f"Executing SQL: {sql[:100]}...")
             if self.engine is None:
                 raise RuntimeError("Database engine is not initialized. Please call connect() first.")
@@ -181,7 +178,6 @@ class DatabaseExecutor:
             result = self.execute(sql)
             results.append(result)
 
-        # Summaries
         success_count = sum(1 for r in results if r.success)
         fail_count = len(results) - success_count
 
@@ -268,15 +264,12 @@ class DatabaseExecutor:
 
         fk_dict = {}
 
-        # Access by column names when available
         for _, row in result.data.iterrows():
-            # Use column names (case-insensitive)
             if 'column_name' in result.data.columns:
                 fk_col = row['column_name']
                 ref_table = row.get('referenced_table_name', None)
                 ref_col = row.get('referenced_column_name', None)
             else:
-                # Fallback to positional indexing
                 fk_col = row.iloc[0]
                 ref_table = row.iloc[1] if len(row) > 1 else None
                 ref_col = row.iloc[2] if len(row) > 2 else None
@@ -290,7 +283,6 @@ class DatabaseExecutor:
         """Get schema info for multiple tables"""
         schema = {}
         for table_name in table_names:
-            # Column info
             table_info = self.get_table_info(table_name)
             if table_info is not None and not table_info.empty:
                 if self.config.db_type == 'mysql':
@@ -298,10 +290,7 @@ class DatabaseExecutor:
             else:
                 columns = []
 
-            # Primary keys
             primary_keys = self.get_primary_keys(table_name)
-
-            # Foreign keys
             foreign_keys = self.get_foreign_keys(table_name)
 
             schema[table_name] = {

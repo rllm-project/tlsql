@@ -12,8 +12,8 @@ def train():
 
     train_sql = """
     TRAIN WITH (users.*, movies.title, ratings.*)
-    FROM Tables(users, movies, ratings)
-    WHERE users.Age > 25 AND movies.Year > 2000 AND ratings.Rating >= 4
+    FROM users, movies, ratings
+    WHERE users.Gender='M' and users.userID<3000
     """
 
     print("TLSQL:")
@@ -42,7 +42,6 @@ def test():
 
     result = tlsql.convert(predict_sql)
 
-    print(f"{result.statement_type}")
     print(f"Target Column: {result.target_column}")
     print(f"Task Type: {result.task_type}")
     print(f"Target Table: {result.target_table}")
@@ -57,9 +56,9 @@ def validate():
     print("\nVALIDATE Statement")
 
     validate_sql = """
-    VALIDATE WITH (users.*, movies.*)
-    FROM Tables(users, movies)
-    WHERE users.Age BETWEEN 30 AND 50
+    VALIDATE WITH (users.Age)
+    FROM users
+    WHERE users.Gender='M' and users.userID > 3000
     """
 
     print("TLSQL:")
