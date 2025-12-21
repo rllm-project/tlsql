@@ -56,7 +56,6 @@ def test_predict_basic():
             print(f"  Table: {predict.from_table.table}")
             print(f"  Has WHERE: {predict.where is not None}")
 
-            # Test SQL generation
             generator = SQLGenerator()
             filter_cond = generator.generate_predict_filter(predict)
             print(f"  Generated condition: {filter_cond.condition}")
@@ -322,11 +321,6 @@ def test_predict_edge_cases():
 def run_all_tests():
     """Run all PREDICT statement tests"""
     print("PREDICT Statement Tests")
-
-    # test_predict_basic()
-    # test_predict_where_conditions()
-    # test_predict_column_references()
-    # test_predict_task_types()
     test_predict_edge_cases()
 
 

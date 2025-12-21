@@ -10,7 +10,7 @@ sys.path.append("../../")
 from tlsql import Lexer
 
 
-query = "PREDICT VALUE(users.Age, CLF)FROM users WHERE users.Gender = 'M'"
+query = "PREDICT VALUE(users.Age, CLF) FROM users WHERE users.Gender='F' "
 lexer = Lexer(query)
 
 tokens = lexer.tokenize()
