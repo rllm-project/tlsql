@@ -1,6 +1,6 @@
-"""Baseline Methods for Comparison
+"""Methods for Comparison
 
-This module provides baseline methods to compare with BRIDGE model performance.
+This module provides methods to compare with BRIDGE model performance.
 """
 
 import time
@@ -26,7 +26,7 @@ class MLP(nn.Module):
 
 
 class RandomGuess:
-    """Random guessing baseline """
+    """Random guessing method"""
     def __init__(self, num_classes):
         self.num_classes = num_classes
 
@@ -58,7 +58,7 @@ def extract_features(target_table, device):
 
 
 def train_mlp(model, features, y, train_mask, val_mask, test_mask, epochs, lr, wd, device):
-    """Train MLP baseline model"""
+    """Train MLP model"""
     optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=wd)
     criterion = nn.CrossEntropyLoss()
 
@@ -102,12 +102,21 @@ def train_mlp(model, features, y, train_mask, val_mask, test_mask, epochs, lr, w
 
     print(f"MLP Mean time per epoch: {torch.tensor(times).mean():.4f}s")
     print(f"MLP Total time: {sum(times):.4f}s")
+    
+    # Calculate final train accuracy
+    model.eval()
+    with torch.no_grad():
+        logits_all = model(features)
+        preds = logits_all.argmax(dim=1)
+        final_train_acc = float(preds[train_mask].eq(y_long[train_mask]).sum()) / int(train_mask.sum())
+    
+    print(f"MLP Final - Train Acc: {final_train_acc:.4f}, Val Acc: {best_val_acc:.4f}, Test Acc: {test_acc:.4f}")
 
-    return best_val_acc, test_acc
+    return final_train_acc, best_val_acc, test_acc
 
 
-def run_mlp_baseline(target_table, epochs=20, lr=0.01, wd=1e-4, device=None):
-    """Run MLP baseline model"""
+def run_mlp(target_table, epochs=20, lr=0.01, wd=1e-4, device=None):
+    """Run MLP model"""
     device = target_table.y.device if device is None else device
 
     features = extract_features(target_table, device)
@@ -120,18 +129,20 @@ def run_mlp_baseline(target_table, epochs=20, lr=0.01, wd=1e-4, device=None):
     )
 
 
-def run_random_baseline(y, train_mask, val_mask, test_mask):
-    """Run random baseline"""
+def run_random(y, train_mask, val_mask, test_mask):
+    """Run random method"""
     y_long = y.long()
     num_classes = y_long.max().item() + 1
-    random_baseline = RandomGuess(num_classes)
+    random_model = RandomGuess(num_classes)
 
-    train_preds = random_baseline(y, train_mask)
-    val_preds = random_baseline(y, val_mask)
-    test_preds = random_baseline(y, test_mask)
+    train_preds = random_model(y, train_mask)
+    val_preds = random_model(y, val_mask)
+    test_preds = random_model(y, test_mask)
 
     train_acc = float(train_preds.eq(y_long[train_mask]).sum()) / int(train_mask.sum())
     val_acc = float(val_preds.eq(y_long[val_mask]).sum()) / int(val_mask.sum())
     test_acc = float(test_preds.eq(y_long[test_mask]).sum()) / int(test_mask.sum())
+
+    print(f"Random Guess - Train Acc: {train_acc:.4f}, Val Acc: {val_acc:.4f}, Test Acc: {test_acc:.4f}")
 
     return train_acc, val_acc, test_acc

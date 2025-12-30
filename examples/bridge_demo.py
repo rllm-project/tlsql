@@ -9,8 +9,8 @@ import torch
 import torch.nn.functional as F
 
 from tlsql.examples.bridge.data_loader import prepare_data_from_tlsql
-from tlsql.examples.bridge.model import build_bridge_model
-from tlsql.examples.bridge.baselines import run_random_baseline, run_mlp_baseline
+from tlsql.examples.bridge.model import build_bridge
+from tlsql.examples.bridge.baselines import run_random, run_mlp
 
 
 def train_bridge(model, optimizer, target_table, non_table_embeddings, adj, y, train_mask):
@@ -37,21 +37,31 @@ def test_bridge(model, target_table, non_table_embeddings, adj, y, masks):
     return accs
 
 
-def train_bridge_model(model, target_table, non_table_embeddings, adj, epochs=10, lr=0.005, wd=1e-4):
+def train_bridge_model(target_table, non_table_embeddings, adj, emb_size, epochs=10, lr=0.005, wd=1e-4, device=None):
     """Train BRIDGE model
 
     Args:
-        model: BRIDGE model instance
         target_table: Target table data
         non_table_embeddings: Non-table embeddings
         adj: Adjacency matrix
+        emb_size: Embedding size
         epochs: Number of training epochs
         lr: Learning rate
         wd: Weight decay
+        device: Device (CPU/GPU)
 
     Returns:
-        tuple: (model, best_val_acc, test_acc)
+        tuple: (final_train_acc, best_val_acc, test_acc)
     """
+    if device is None:
+        device = target_table.y.device
+    
+    model = build_bridge(
+        target_table.num_classes,
+        target_table.metadata,
+        emb_size
+    ).to(device)
+    
     y = target_table.y.long() if target_table.y.dtype != torch.long else target_table.y
     train_mask, val_mask, test_mask = (
         target_table.train_mask,
@@ -85,8 +95,16 @@ def train_bridge_model(model, target_table, non_table_embeddings, adj, epochs=10
 
     print(f"BRIDGE Mean time per epoch: {torch.tensor(times).mean():.4f}s")
     print(f"BRIDGE Total time: {sum(times):.4f}s")
-    print(f"Test {metric} at best Val: {test_acc:.4f}")
-    return model, best_val_acc, test_acc
+    
+    # Calculate final train accuracy
+    model.eval()
+    with torch.no_grad():
+        logits = model(table=target_table, non_table=non_table_embeddings, adj=adj)
+        preds = logits.argmax(dim=1)
+        final_train_acc = float(preds[train_mask].eq(y[train_mask]).sum().item()) / int(train_mask.sum())
+    
+    print(f"BRIDGE Final - Train Acc: {final_train_acc:.4f}, Val Acc: {best_val_acc:.4f}, Test Acc: {test_acc:.4f}")
+    return final_train_acc, best_val_acc, test_acc
 
 
 def main():
@@ -133,37 +151,32 @@ def main():
     print(f"Test samples: {target_table.test_mask.sum().item()}")
 
     # Random Guess
-    print("\nRunning Random Guess Baseline...")
+    print("\nRunning Random Guess...")
     train_mask, val_mask, test_mask = (
         target_table.train_mask,
         target_table.val_mask,
         target_table.test_mask,
     )
-    random_train_acc, random_val_acc, random_test_acc = run_random_baseline(
+    random_train_acc, random_val_acc, random_test_acc = run_random(
         target_table.y, train_mask, val_mask, test_mask
     )
-    print(f"Random Guess - Train Acc: {random_train_acc:.4f}, Val Acc: {random_val_acc:.4f}, Test Acc: {random_test_acc:.4f}")
 
     # MLP
-    print("\nRunning MLP Baseline...")
-    mlp_val_acc, mlp_test_acc = run_mlp_baseline(target_table, device=device)
+    print("\nRunning MLP...")
+    mlp_train_acc, mlp_val_acc, mlp_test_acc = run_mlp(target_table, device=device)
 
     # BRIDGE Model
     print("\nRunning BRIDGE Model...")
-    bridge_model = build_bridge_model(
-        target_table.num_classes,
-        target_table.metadata,
-        emb_size
-    ).to(device)
-
-    bridge_model, bridge_val_acc, bridge_test_acc = train_bridge_model(
-        bridge_model, target_table, non_table_embeddings, adj
+    bridge_train_acc, bridge_val_acc, bridge_test_acc = train_bridge_model(
+        target_table, non_table_embeddings, adj, emb_size, device=device
     )
 
-    print(f"\n{'Method':<20} {'Val Acc':<15} {'Test Acc':<15}")
-    print(f"{'Random Guess':<20} {random_val_acc:<15.4f} {random_test_acc:<15.4f}")
-    print(f"{'MLP':<20} {mlp_val_acc:<15.4f} {mlp_test_acc:<15.4f}")
-    print(f"{'BRIDGE':<20} {bridge_val_acc:<15.4f} {bridge_test_acc:<15.4f}")
+    # Final comparison table
+    print(f"\n{'Method':<20} {'Train Acc':<15} {'Val Acc':<15} {'Test Acc':<15}")
+    print(f"{'='*65}")
+    print(f"{'Random Guess':<20} {random_train_acc:<15.4f} {random_val_acc:<15.4f} {random_test_acc:<15.4f}")
+    print(f"{'MLP':<20} {mlp_train_acc:<15.4f} {mlp_val_acc:<15.4f} {mlp_test_acc:<15.4f}")
+    print(f"{'BRIDGE':<20} {bridge_train_acc:<15.4f} {bridge_val_acc:<15.4f} {bridge_test_acc:<15.4f}")
 
 
 if __name__ == "__main__":

@@ -795,7 +795,7 @@ best_params = grid_search(
 <span class="comment"># 1. 导入必要的模块</span>
 <span class="keyword">import</span> torch
 <span class="keyword">from</span> tlsql.examples.bridge.data_loader <span class="keyword">import</span> prepare_data_from_tlsql
-<span class="keyword">from</span> tlsql.examples.bridge.model <span class="keyword">import</span> build_bridge_model
+<span class="keyword">from</span> tlsql.examples.bridge.model <span class="keyword">import</span> build_bridge
 <span class="keyword">from</span> tlsql.examples.bridge_demo <span class="keyword">import</span> train_bridge_model
 
 <span class="comment"># 2. 定义 TLSQL 语句</span>
@@ -827,7 +827,7 @@ target_table, non_table_embeddings, adj, emb_size = prepare_data_from_tlsql(
 )
 
 <span class="comment"># 4. 构建模型</span>
-bridge_model = build_bridge_model(
+bridge_model = build_bridge(
     target_table.num_classes,
     target_table.metadata,
     emb_size

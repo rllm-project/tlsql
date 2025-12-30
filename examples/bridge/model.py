@@ -33,7 +33,7 @@ def build_homo_graph(
     return graph
 
 
-def build_bridge_model(num_classes, metadata, emb_size):
+def build_bridge(num_classes, metadata, emb_size):
     """Build BRIDGE model
     Args:
         num_classes: Number of output classes
