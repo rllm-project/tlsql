@@ -1,6 +1,106 @@
 /* Custom CSS for inline attribute descriptions */
 /* Force attributes to display on same line with colon */
 
+/* Font size hierarchy - from large to small */
+/* Page titles (h1) - largest */
+h1 {
+    font-size: 2.5em !important;
+}
+
+/* Section titles (h2) */
+h2 {
+    font-size: 2em !important;
+}
+
+/* Subsection titles (h3) */
+h3 {
+    font-size: 1.5em !important;
+}
+
+/* Class names - larger font size for better hierarchy */
+dl.py.class dt:not(.field-list dt),
+dl.py.class > dt:not(.field-list dt) {
+    font-size: 1.6em !important;
+}
+
+/* Function names - medium font size */
+dl.py.function dt:not(.field-list dt),
+dl.py.function > dt:not(.field-list dt) {
+    font-size: 1.3em !important;
+}
+
+/* Method names - smaller font size to distinguish from class names */
+dl.py.method dt:not(.field-list dt),
+dl.py.method > dt:not(.field-list dt) {
+    font-size: 1.2em !important;
+}
+
+/* Generic sig-object fallback */
+.sig-object:not(.field-list dt),
+.sig-object dt:not(.field-list dt) {
+    font-size: 1.3em !important;
+}
+
+/* Attributes container title */
+.attributes-title {
+    font-size: 0.95em !important;
+}
+
+/* Attribute names */
+dl.py.attribute dt,
+dl.py.attribute dt .sig-name.descname {
+    font-size: 0.95em !important;
+    font-family: inherit !important;
+    font-style: normal !important;
+    line-height: inherit !important;
+    letter-spacing: normal !important;
+}
+
+/* Attribute descriptions */
+dl.py.attribute dd,
+dl.py.attribute dd p {
+    font-size: 0.95em !important;
+    font-family: inherit !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    line-height: inherit !important;
+    letter-spacing: normal !important;
+}
+
+/* Function/Class documentation field labels (Parameters, Returns, Return type, etc.) */
+/* Comprehensive selectors to ensure field labels are styled correctly - must override class/function styles */
+.field-list dt,
+.field-list > dt,
+.field-name,
+.field-list dt strong,
+.field-list dt .field-name,
+dl.py.function ~ .field-list dt,
+dl.py.class ~ .field-list dt,
+.sig-object ~ .field-list dt,
+article .field-list dt,
+section .field-list dt,
+dl.field-list dt,
+dd.field-list dt,
+dl.py.class .field-list dt,
+dl.py.function .field-list dt,
+.sig-object .field-list dt {
+    font-size: 0.9em !important;
+    font-weight: 600 !important;
+    text-transform: capitalize !important;
+}
+
+/* Function/Class documentation field content */
+.field-list dd,
+.field-body {
+    font-size: 0.9em !important;
+}
+
+/* Field list paragraphs */
+.field-list dd p,
+.field-body p {
+    font-size: 0.9em !important;
+}
+
 /* Very specific selectors for attribute lists */
 dl.py.attribute dt,
 dl.py.attribute > dt,
@@ -9,12 +109,18 @@ dl[class*="attribute"] > dt,
 .class dl.py.attribute dt,
 .class dl[class*="attribute"] dt {
     display: inline !important;
+    font-size: 0.95em !important;
     font-weight: bold !important;
+    font-family: inherit !important;
+    font-style: normal !important;
+    line-height: inherit !important;
+    letter-spacing: normal !important;
     float: none !important;
     clear: none !important;
     margin: 0 !important;
     padding: 0 !important;
     width: auto !important;
+    white-space: nowrap !important;
 }
 
 /* Handle nested sig-name spans */
@@ -23,13 +129,31 @@ dl.py.attribute dt .sig-name.descname .pre {
     font-weight: bold !important;
 }
 
-/* Add colon after attribute name */
+/* Remove spacing from headerlink in attribute dt to prevent space before colon */
+dl.py.attribute dt a.headerlink,
+dl[class*="attribute"] dt a.headerlink {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: inline !important;
+}
+
+/* Add colon after attribute name - comprehensive selectors for all pages */
 dl.py.attribute dt::after,
 dl.py.attribute > dt::after,
 dl[class*="attribute"] dt::after,
 dl[class*="attribute"] > dt::after,
 .class dl.py.attribute dt::after,
-.class dl[class*="attribute"] dt::after {
+.class dl[class*="attribute"] dt::after,
+.attributes-container dl.py.attribute dt::after,
+.attributes-container dl[class*="attribute"] dt::after,
+dl.py.attribute.in-container dt::after,
+dl[class*="attribute"].in-container dt::after,
+article dl.py.attribute dt::after,
+article dl[class*="attribute"] dt::after,
+section dl.py.attribute dt::after,
+section dl[class*="attribute"] dt::after,
+.furo dl.py.attribute dt::after,
+.furo dl[class*="attribute"] dt::after {
     content: ": " !important;
     font-weight: normal !important;
 }
@@ -42,6 +166,12 @@ dl[class*="attribute"] > dd,
 .class dl.py.attribute dd,
 .class dl[class*="attribute"] dd {
     display: inline !important;
+    font-size: 0.95em !important;
+    font-family: inherit !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    line-height: inherit !important;
+    letter-spacing: normal !important;
     margin: 0 !important;
     padding: 0 !important;
     float: none !important;
@@ -57,6 +187,11 @@ dl[class*="attribute"] > dd p,
 .class dl.py.attribute dd p,
 .class dl[class*="attribute"] dd p {
     display: inline !important;
+    font-family: inherit !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    line-height: inherit !important;
+    letter-spacing: normal !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -193,4 +328,183 @@ article dl.py.attribute dd,
 section dl.py.attribute dt,
 section dl.py.attribute dd {
     display: inline !important;
+}
+
+/* ============================================
+   API Documentation Spacing Optimization
+   ============================================ */
+
+/* Spacing for API documentation elements (classes, functions, methods) */
+dl.py.class,
+dl.py.function,
+dl.py.method {
+    margin-top: 2em !important;
+    margin-bottom: 2em !important;
+}
+
+/* First API element after a heading should have less top margin */
+h2 + dl.py.class,
+h2 + dl.py.function,
+h2 + dl.py.method,
+h3 + dl.py.class,
+h3 + dl.py.function,
+h3 + dl.py.method {
+    margin-top: 1em !important;
+}
+
+/* Spacing for class/function signatures (dt) */
+dl.py.class dt,
+dl.py.class > dt,
+dl.py.function dt,
+dl.py.function > dt,
+dl.py.method dt,
+dl.py.method > dt {
+    margin-bottom: 0.5em !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    text-indent: 0 !important;
+    white-space: nowrap !important;
+}
+
+/* Spacing for class/function descriptions (dd) */
+dl.py.class dd,
+dl.py.class > dd,
+dl.py.function dd,
+dl.py.function > dd,
+dl.py.method dd,
+dl.py.method > dd {
+    margin-bottom: 1.5em !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Ensure proper spacing between signature and description */
+dl.py.class dt + dd,
+dl.py.class > dt + dd,
+dl.py.function dt + dd,
+dl.py.function > dt + dd,
+dl.py.method dt + dd,
+dl.py.method > dt + dd {
+    margin-top: 0.5em !important;
+}
+
+/* Field list spacing (Parameters, Returns, etc.) */
+.field-list {
+    margin-top: 1.2em !important;
+    margin-bottom: 1.2em !important;
+}
+
+/* Field list labels (dt) - Parameters, Returns, etc. */
+.field-list dt {
+    margin-top: 0.8em !important;
+    margin-bottom: 0.4em !important;
+    padding-top: 0.3em !important;
+}
+
+/* First field label should have less top margin */
+.field-list dt:first-child {
+    margin-top: 0.4em !important;
+}
+
+/* Field list content (dd) - parameter/return descriptions */
+.field-list dd {
+    margin-bottom: 0.8em !important;
+    margin-left: 1.5em !important;
+    padding-left: 0.8em !important;
+    border-left: 2px solid #e8e8e8 !important;
+    line-height: 1.6 !important;
+}
+
+/* Spacing for paragraphs inside field list */
+.field-list dd p {
+    margin-bottom: 0.5em !important;
+}
+
+.field-list dd p:last-child {
+    margin-bottom: 0 !important;
+}
+
+/* Spacing for field body */
+.field-body {
+    margin-top: 0.5em !important;
+    margin-bottom: 0.5em !important;
+}
+
+/* Improve spacing for nested field lists */
+.field-list .field-list {
+    margin-top: 0.8em !important;
+    margin-bottom: 0.8em !important;
+    margin-left: 1em !important;
+}
+
+/* Spacing between API elements and field lists */
+dl.py.class ~ .field-list,
+dl.py.function ~ .field-list,
+dl.py.method ~ .field-list {
+    margin-top: 1em !important;
+}
+
+/* Spacing for viewcode links - ensure they stay on same line */
+dl.py.class dt .viewcode-link,
+dl.py.function dt .viewcode-link,
+dl.py.method dt .viewcode-link,
+dl.py.class dt a.viewcode-link,
+dl.py.function dt a.viewcode-link,
+dl.py.method dt a.viewcode-link,
+dl.py.class dt .viewcode-link a,
+dl.py.function dt .viewcode-link a,
+dl.py.method dt .viewcode-link a {
+    margin-left: 0.5em !important;
+    white-space: nowrap !important;
+    display: inline !important;
+}
+
+/* Ensure all elements inside dt stay inline */
+dl.py.class dt > *,
+dl.py.class > dt > *,
+dl.py.function dt > *,
+dl.py.function > dt > *,
+dl.py.method dt > *,
+dl.py.method > dt > * {
+    white-space: nowrap !important;
+    display: inline !important;
+}
+
+/* Spacing for inheritance information */
+dl.py.class .descclassname,
+dl.py.function .descclassname,
+dl.py.method .descclassname {
+    margin-right: 0.3em !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Remove any spacing before class/function signatures */
+dl.py.class dt .descclassname:first-child,
+dl.py.class > dt .descclassname:first-child,
+dl.py.function dt .descclassname:first-child,
+dl.py.function > dt .descclassname:first-child,
+dl.py.method dt .descclassname:first-child,
+dl.py.method > dt .descclassname:first-child {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Remove spacing from first child element in dt */
+dl.py.class dt > *:first-child,
+dl.py.class > dt > *:first-child,
+dl.py.function dt > *:first-child,
+dl.py.function > dt > *:first-child,
+dl.py.method dt > *:first-child,
+dl.py.method > dt > *:first-child {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Dark mode support for API spacing */
+@media (prefers-color-scheme: dark) {
+    .field-list dd {
+        border-left-color: #444444 !important;
+    }
 }

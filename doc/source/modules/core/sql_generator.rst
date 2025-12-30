@@ -20,9 +20,6 @@ Example
         for sql_obj in result.sql_list:
             print(f"SQL: {sql_obj.sql}")
 
-API Reference
--------------
-
 Main Function
 ~~~~~~~~~~~~~
 

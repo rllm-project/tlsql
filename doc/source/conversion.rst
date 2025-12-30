@@ -63,8 +63,8 @@ The conversion process consists of four main steps:
          from_table=FromClause(table='users'),
          where=WhereClause(
            condition=BinaryExpr(
-             op='=',
-             left=ColumnExpr(column=ColumnReference(table='users', column='Gender')),
+               op='=',
+               left=ColumnExpr(column=ColumnReference(table='users', column='Gender')),
              right=LiteralExpr(value='F')
            )
          )
@@ -78,10 +78,10 @@ The conversion process consists of four main steps:
 
    **Extracted Information:**
    
-   - Target Table: ``users``
-   - Target Column: ``users.Age``
-   - Task Type: ``CLF`` (Classification)
-   - WHERE Condition: ``Gender = 'F'``
+   - Target Table: ``users``.
+   - Target Column: ``users.Age``.
+   - Task Type: ``CLF`` (Classification).
+   - WHERE Condition: ``Gender = 'F'``.
 
 4. **Result Assembly**
    

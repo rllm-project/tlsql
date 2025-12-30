@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 title.textContent = 'ATTRIBUTES';
                 title.style.cssText = `
                     font-weight: 600 !important;
-                    font-size: 0.9em !important;
+                    font-size: 0.95em !important;
                     color: #0066cc !important;
                     margin-bottom: 0.5em !important;
                     text-transform: uppercase !important;
@@ -162,25 +162,73 @@ document.addEventListener('DOMContentLoaded', function() {
         dts.forEach(function(dt, index) {
             dt.style.cssText = `
                 display: inline !important;
+                font-size: 0.95em !important;
                 font-weight: bold !important;
+                font-family: inherit !important;
+                font-style: normal !important;
+                line-height: inherit !important;
+                letter-spacing: normal !important;
                 float: none !important;
                 clear: none !important;
                 margin: 0 !important;
                 padding: 0 !important;
+                white-space: nowrap !important;
             `;
             
-            // Extract text content from nested spans
+            // Clean up trailing whitespace in dt element to prevent space before colon
+            // Remove trailing whitespace from all text nodes, especially the last one
+            const walker = document.createTreeWalker(
+                dt,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            const textNodes = [];
+            let node;
+            while (node = walker.nextNode()) {
+                textNodes.push(node);
+            }
+            // Remove trailing whitespace from the last text node
+            if (textNodes.length > 0) {
+                const lastNode = textNodes[textNodes.length - 1];
+                lastNode.textContent = lastNode.textContent.replace(/\s+$/, '');
+            }
+            
+            // Remove headerlink from attribute dt to match tokens page style
+            // This ensures all pages have consistent formatting without headerlink
+            const headerlink = dt.querySelector('a.headerlink');
+            if (headerlink) {
+                headerlink.remove();
+            }
+            
+            // Clean up whitespace after removing headerlink
             const sigName = dt.querySelector('.sig-name.descname');
             if (sigName) {
                 sigName.style.cssText = `
                     font-weight: bold !important;
                 `;
+                
+                // Remove any trailing whitespace text nodes after sig-name
+                let sibling = sigName.nextSibling;
+                while (sibling) {
+                    const nextSibling = sibling.nextSibling;
+                    if (sibling.nodeType === Node.TEXT_NODE && /^\s*$/.test(sibling.textContent)) {
+                        dt.removeChild(sibling);
+                    }
+                    sibling = nextSibling;
+                }
             }
             
             if (dds[index]) {
                 const dd = dds[index];
                 dd.style.cssText = `
                     display: inline !important;
+                    font-size: 0.95em !important;
+                    font-family: inherit !important;
+                    font-style: normal !important;
+                    font-weight: normal !important;
+                    line-height: inherit !important;
+                    letter-spacing: normal !important;
                     margin: 0 !important;
                     padding: 0 !important;
                     float: none !important;
@@ -191,6 +239,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 paragraphs.forEach(function(p) {
                     p.style.cssText = `
                         display: inline !important;
+                        font-size: 0.95em !important;
+                        font-family: inherit !important;
+                        font-style: normal !important;
+                        font-weight: normal !important;
+                        line-height: inherit !important;
+                        letter-spacing: normal !important;
                         margin: 0 !important;
                         padding: 0 !important;
                     `;
@@ -198,6 +252,111 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Redirect convert function source link to SQLGenerator.convert
+    // When user clicks on [source] link for tlsql.convert, redirect to SQLGenerator.convert
+    function redirectConvertSourceLinks() {
+        // Find all viewcode links (source code links)
+        document.querySelectorAll('a.viewcode-link, a[href*="_modules"]').forEach(function(link) {
+            const href = link.getAttribute('href');
+            const text = link.textContent || '';
+            const parentText = link.parentElement ? link.parentElement.textContent || '' : '';
+            
+            // Check if this link is for tlsql.convert function
+            // Look for links that point to __init__.py and are near "convert" text
+            if (href && (href.includes('__init__') || href.includes('tlsql.convert'))) {
+                // Check if the context suggests this is the convert function
+                const isConvertFunction = text.includes('convert') || 
+                                         parentText.includes('convert') ||
+                                         link.closest('.sig') && link.closest('.sig').textContent.includes('convert');
+                
+                if (isConvertFunction) {
+                    // Build the new href pointing to SQLGenerator class page
+                    // Sphinx generates links like: _modules/tlsql/__init__.html#tlsql.convert
+                    // We want: _modules/tlsql/tlsql/sql_generator.html#SQLGenerator
+                    let newHref = href;
+                    
+                    // Replace __init__.html with tlsql/sql_generator.html
+                    newHref = newHref.replace(/\/__init__\.html/, '/tlsql/sql_generator.html');
+                    newHref = newHref.replace(/__init__\.html/, 'tlsql/sql_generator.html');
+                    newHref = newHref.replace(/_modules\/tlsql\/__init__\.html/, '_modules/tlsql/tlsql/sql_generator.html');
+                    
+                    // Replace the anchor/fragment to point to SQLGenerator class
+                    newHref = newHref.replace(/#.*$/, '#SQLGenerator');
+                    
+                    if (newHref !== href) {
+                        link.setAttribute('href', newHref);
+                        console.log('Redirected convert source link:', href, '->', newHref);
+                    }
+                }
+            }
+        });
+        
+        // Also handle click events on convert function source links
+        document.querySelectorAll('a[href*="__init__"], a[href*="tlsql.convert"]').forEach(function(link) {
+            const originalHref = link.getAttribute('href');
+            if (originalHref && (originalHref.includes('__init__') || originalHref.includes('tlsql.convert'))) {
+                link.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    const text = this.textContent || '';
+                    const parentText = this.parentElement ? this.parentElement.textContent || '' : '';
+                    
+                    // Check if this is the convert function
+                    if (text.includes('convert') || parentText.includes('convert') || 
+                        (href && href.includes('tlsql.convert'))) {
+                        // Redirect to SQLGenerator class page
+                        let newHref = href.replace(/\/__init__\.html/, '/tlsql/sql_generator.html')
+                                          .replace(/__init__\.html/, 'tlsql/sql_generator.html')
+                                          .replace(/_modules\/tlsql\/__init__\.html/, '_modules/tlsql/tlsql/sql_generator.html')
+                                          .replace(/#.*$/, '#SQLGenerator');
+                        
+                        if (newHref !== href) {
+                            e.preventDefault();
+                            window.location.href = newHref;
+                            return false;
+                        }
+                    }
+                });
+            }
+        });
+    }
+    
+    // Run immediately and also after a short delay to catch dynamically loaded content
+    redirectConvertSourceLinks();
+    setTimeout(redirectConvertSourceLinks, 100);
+    setTimeout(redirectConvertSourceLinks, 500);
+    
+    // Check if we're currently on the __init__.py convert function page and redirect
+    function checkAndRedirectIfNeeded() {
+        const currentUrl = window.location.href;
+        const currentPath = window.location.pathname;
+        
+        // Check if we're on __init__.py page with convert function
+        if (currentPath.includes('__init__') && 
+            (currentUrl.includes('tlsql.convert') || 
+             currentUrl.includes('#tlsql.convert') ||
+             document.querySelector('h1') && document.querySelector('h1').textContent.includes('__init__.py'))) {
+            
+            // Check if the page content is about convert function
+            const pageContent = document.body.textContent || '';
+            if (pageContent.includes('def convert') && pageContent.includes('SQLGenerator.convert')) {
+                // Redirect to SQLGenerator class page
+                let newUrl = currentUrl.replace(/\/__init__\.html/, '/tlsql/sql_generator.html')
+                                      .replace(/__init__\.html/, 'tlsql/sql_generator.html')
+                                      .replace(/_modules\/tlsql\/__init__\.html/, '_modules/tlsql/tlsql/sql_generator.html')
+                                      .replace(/#.*$/, '#SQLGenerator');
+                
+                if (newUrl !== currentUrl) {
+                    console.log('Auto-redirecting from __init__.py convert to SQLGenerator:', newUrl);
+                    window.location.replace(newUrl);
+                }
+            }
+        }
+    }
+    
+    // Check on page load
+    checkAndRedirectIfNeeded();
+    setTimeout(checkAndRedirectIfNeeded, 200);
     
     // Dark mode support
     if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {

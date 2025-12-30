@@ -14,9 +14,6 @@ Exception Hierarchy
     ├── ParseError (parsing errors)
     └── GenerationError (SQL generation errors)
 
-API Reference
--------------
-
 .. autoclass:: tlsql.tlsql.exceptions.TLSQLError
    :no-members:
    :no-inherited-members:

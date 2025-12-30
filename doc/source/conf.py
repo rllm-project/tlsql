@@ -15,17 +15,19 @@ import sys
 
 # Add the project root to the path so we can import tlsql
 # For Read the Docs: try importing first (if installed via pip)
+# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory
+tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+if tlsql_dir not in sys.path:
+    sys.path.insert(0, tlsql_dir)
+parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Ensure tlsql can be imported for viewcode extension
 try:
     import tlsql.tlsql
 except ImportError:
-    # For local development: add paths manually
-    # conf.py is in doc/source/, so go up two levels to reach tlsql/ directory
-    tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-    if tlsql_dir not in sys.path:
-        sys.path.insert(0, tlsql_dir)
-    parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
-    if parent_dir not in sys.path:
-        sys.path.insert(0, parent_dir)
+    pass
 
 # -- Project information -----------------------------------------------------
 
@@ -69,10 +71,10 @@ napoleon_attr_annotations = False  # Don't show attribute type annotations
 
 # Autodoc settings
 autodoc_default_options = {
-    'members': False,  # Don't show members in sidebar, only show class names
+    'members': True,  # Show members (methods and attributes) by default
     'member-order': 'bysource',
-    'special-members': False,  # Don't show special members
-    'undoc-members': False,
+    'special-members': False,  # Don't show special members (__init__, etc.) unless explicitly requested
+    'undoc-members': False,  # Don't show members without docstrings
     'exclude-members': '__weakref__',
     'show-inheritance': True,  # Show inheritance in class documentation
     'imported-members': False,  # Don't document imported members to avoid duplicates
@@ -100,6 +102,11 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'conversion.rst']
 
 # Mock imports for modules that may not be available during documentation build
 autodoc_mock_imports = []
+
+# Viewcode settings - enable source code links for all documented objects
+# This ensures that [source] links appear for all classes and functions
+viewcode_enable_epub = True  # Enable viewcode in epub output
+viewcode_follow_imported_members = True  # Follow imported members to show their source
 
 # Intersphinx mapping for external documentation
 intersphinx_mapping = {
@@ -150,6 +157,7 @@ html_js_files = ['custom.js']
 
 # Use default furo sidebar (no custom templates needed)
 # html_sidebars = {}  # Use default sidebar configuration
+
 
 def setup(app):
     """Setup function for Sphinx."""

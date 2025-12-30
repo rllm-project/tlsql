@@ -3,9 +3,9 @@ Parser
 
 The :class:`Parser` converts tokens into an Abstract Syntax Tree (AST). It supports three statement types:
 
-- **TRAIN WITH**: Training data selection
-- **PREDICT VALUE**: Prediction targets and task types
-- **VALIDATE WITH**: Validation data selection
+- **TRAIN WITH**: Training data selection.
+- **PREDICT VALUE**: Prediction targets and task types.
+- **VALIDATE WITH**: Validation data selection.
 
 Example
 -------
@@ -21,10 +21,7 @@ Example
         print(f"Target: {ast.predict.value.target}")
         print(f"Task Type: {ast.predict.value.predict_type.type_name}")
 
-API Reference
--------------
-
 .. autoclass:: tlsql.tlsql.parser.Parser
-   :no-members:
+   :members:
    :no-inherited-members:
    :show-inheritance:

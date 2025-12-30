@@ -7,11 +7,11 @@ literals, operators, and punctuation.
 Supported Elements
 ------------------
 
-- **Keywords**: TRAIN, PREDICT, VALIDATE, WITH, FROM, WHERE
-- **Identifiers**: Table and column names
-- **Literals**: Strings (with escape sequences) and numbers
-- **Operators**: Comparison (>, <, >=, <=, =, !=) and logical (AND, OR, NOT)
-- **Comments**: Single-line (``--``) and multi-line (``/* */``)
+- **Keywords**: TRAIN, PREDICT, VALIDATE, WITH, FROM, WHERE.
+- **Identifiers**: Table and column names.
+- **Literals**: Strings (with escape sequences) and numbers.
+- **Operators**: Comparison (>, <, >=, <=, =, !=) and logical (AND, OR, NOT).
+- **Comments**: Single-line (``--``) and multi-line (``/* */``).
 
 Example
 -------
@@ -26,10 +26,7 @@ Example
     for token in tokens:
         print(f"{token.type.name}: {token.value}")
 
-API Reference
--------------
-
 .. autoclass:: tlsql.tlsql.lexer.Lexer
-   :no-members:
+   :members:
    :no-inherited-members:
    :show-inheritance:
