@@ -14,94 +14,33 @@ import os
 import sys
 
 # Add the project root to the path so we can import tlsql
-# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory (project root)
+# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory
 # Then go up one more level to reach the parent directory that contains tlsql/
 tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
 
-# Determine the correct path to add to sys.path
-# We need to find the directory that contains tlsql/__init__.py
-# This directory should be added to sys.path so that 'import tlsql' works
-tlsql_path_in_parent = os.path.join(parent_dir, 'tlsql', '__init__.py')
-tlsql_path_in_tlsql_dir = os.path.join(tlsql_dir, '__init__.py')
-tlsql_tlsql_path = os.path.join(tlsql_dir, 'tlsql', '__init__.py')
-
-if os.path.exists(tlsql_path_in_parent):
-    # Normal case: parent_dir contains tlsql/__init__.py
-    sys_path_dir = parent_dir
-    print(f"Using parent_dir as sys.path: {sys_path_dir}")
-elif os.path.exists(tlsql_path_in_tlsql_dir) and os.path.exists(tlsql_tlsql_path):
-    # tlsql_dir is the project root (contains both tlsql/__init__.py and tlsql/tlsql/__init__.py)
-    sys_path_dir = tlsql_dir
-    print(f"Using tlsql_dir as sys.path (project root): {sys_path_dir}")
-else:
-    # Fallback: try tlsql_dir anyway
-    sys_path_dir = tlsql_dir
-    print(f"Warning: Could not find tlsql/__init__.py in expected locations")
-    print(f"Using tlsql_dir as fallback: {sys_path_dir}")
-
-# Add sys_path_dir to sys.path at the beginning to ensure it's checked first
-# This ensures that 'import tlsql' imports from the local code, not installed package
-if sys_path_dir in sys.path:
-    sys.path.remove(sys_path_dir)
-sys.path.insert(0, sys_path_dir)
-print(f"Added to sys.path[0]: {sys_path_dir}")
-
-# Initialize autodoc_mock_imports early so we can add to it if import fails
-# This will be used later in the configuration
-_autodoc_mock_imports_list = []
+# Only add parent_dir to sys.path (not tlsql_dir)
+# This ensures that 'import tlsql' imports tlsql/__init__.py (which has convert)
+# and 'import tlsql.tlsql' imports tlsql/tlsql/__init__.py
+# If we add tlsql_dir to sys.path, 'import tlsql' would import tlsql/tlsql/__init__.py instead
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 # Ensure tlsql can be imported for viewcode extension
 # Force reload to ensure we're using the local version
 tlsql_available = False
-
-# First, try to uninstall any installed tlsql package to avoid conflicts
-# This helps when ReadTheDocs has an old version installed
-try:
-    import subprocess
-    import sys
-    # Try to uninstall tlsql if it's installed (non-blocking)
-    result = subprocess.run(
-        [sys.executable, '-m', 'pip', 'uninstall', '-y', 'tlsql'],
-        capture_output=True,
-        timeout=10
-    )
-    if result.returncode == 0:
-        print("✓ Uninstalled existing tlsql package")
-except Exception:
-    # Ignore errors during uninstall (package might not be installed)
-    pass
-
 try:
     # Remove tlsql from sys.modules if it exists to force reload
-    modules_to_remove = [
-        'tlsql',
-        'tlsql.tlsql',
-        'tlsql.tlsql.sql_generator',
-        'tlsql.tlsql.lexer',
-        'tlsql.tlsql.parser',
-        'tlsql.tlsql.tokens',
-        'tlsql.tlsql.ast_nodes',
-        'tlsql.tlsql.exceptions',
-    ]
-    for module_name in modules_to_remove:
-        if module_name in sys.modules:
-            del sys.modules[module_name]
+    if 'tlsql' in sys.modules:
+        del sys.modules['tlsql']
+    if 'tlsql.tlsql' in sys.modules:
+        del sys.modules['tlsql.tlsql']
+    if 'tlsql.tlsql.sql_generator' in sys.modules:
+        del sys.modules['tlsql.tlsql.sql_generator']
     
-    # Now try to import - should use local code from parent_dir
     import tlsql
     import tlsql.tlsql
     import tlsql.tlsql.ast_nodes  # Test import
-    
-    # Verify that we're using local code, not installed package
-    tlsql_file = getattr(tlsql, '__file__', None)
-    if tlsql_file:
-        expected_local_path = os.path.join(parent_dir, 'tlsql', '__init__.py')
-        if os.path.abspath(tlsql_file) != os.path.abspath(expected_local_path):
-            print(f"Warning: Imported tlsql from {tlsql_file}, expected {expected_local_path}")
-            print("This may cause import errors if the installed package is outdated.")
-        else:
-            print(f"✓ Using local tlsql from {tlsql_file}")
     
     # Test that convert function exists
     if not hasattr(tlsql, 'convert'):
@@ -115,27 +54,14 @@ except ImportError as e:
     # Print error for debugging but don't fail the build
     print(f"Warning: Could not import tlsql: {e}")
     print("Documentation will be built, but autodoc features may be limited.")
-    print("This is usually caused by an outdated installed package.")
-    # Mock tlsql imports to allow documentation to build
-    # This prevents autodoc from failing when it tries to import tlsql modules
-    _autodoc_mock_imports_list.extend([
-        'tlsql',
-        'tlsql.tlsql',
-        'tlsql.tlsql.sql_generator',
-        'tlsql.tlsql.lexer',
-        'tlsql.tlsql.parser',
-        'tlsql.tlsql.tokens',
-        'tlsql.tlsql.ast_nodes',
-        'tlsql.tlsql.exceptions',
-    ])
-    print("Added tlsql modules to autodoc_mock_imports to allow build to continue.")
+    import traceback
+    traceback.print_exc()
 except Exception as e:
     # Catch any other errors during import
     print(f"Warning: Unexpected error importing tlsql: {e}")
     print("Documentation will be built, but autodoc features may be limited.")
-    # Mock tlsql imports to allow documentation to build
-    _autodoc_mock_imports_list.extend(['tlsql', 'tlsql.tlsql'])
-    print("Added tlsql modules to autodoc_mock_imports to allow build to continue.")
+    import traceback
+    traceback.print_exc()
 
 # -- Project information -----------------------------------------------------
 
@@ -209,8 +135,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store', 'conversion.rst']
 
 # Mock imports for modules that may not be available during documentation build
-# Use the list we may have populated during import attempts
-autodoc_mock_imports = _autodoc_mock_imports_list
+autodoc_mock_imports = []
 
 # Viewcode settings - enable source code links for all documented objects
 # This ensures that [source] links appear for all classes and functions
