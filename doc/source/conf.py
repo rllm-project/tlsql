@@ -14,30 +14,38 @@ import os
 import sys
 
 # Add the project root to the path so we can import tlsql
-# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory
+# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory (project root)
 # Then go up one more level to reach the parent directory that contains tlsql/
 tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
 
-# Verify that tlsql directory exists in parent_dir
+# Determine the correct path to add to sys.path
+# We need to find the directory that contains tlsql/__init__.py
+# This directory should be added to sys.path so that 'import tlsql' works
 tlsql_path_in_parent = os.path.join(parent_dir, 'tlsql', '__init__.py')
-if not os.path.exists(tlsql_path_in_parent):
-    # If not found, try using tlsql_dir as parent (for different directory structures)
-    if os.path.exists(os.path.join(tlsql_dir, '__init__.py')):
-        parent_dir = tlsql_dir
-        print(f"Note: Using tlsql_dir as parent_dir: {parent_dir}")
-    else:
-        print(f"Warning: Could not find tlsql/__init__.py in {parent_dir}")
+tlsql_path_in_tlsql_dir = os.path.join(tlsql_dir, '__init__.py')
+tlsql_tlsql_path = os.path.join(tlsql_dir, 'tlsql', '__init__.py')
 
-# Only add parent_dir to sys.path (not tlsql_dir)
-# This ensures that 'import tlsql' imports tlsql/__init__.py (which has convert)
-# and 'import tlsql.tlsql' imports tlsql/tlsql/__init__.py
-# If we add tlsql_dir to sys.path, 'import tlsql' would import tlsql/tlsql/__init__.py instead
-# Remove parent_dir from sys.path first if it exists, then insert at the beginning
-if parent_dir in sys.path:
-    sys.path.remove(parent_dir)
-sys.path.insert(0, parent_dir)
-print(f"Added to sys.path[0]: {parent_dir}")
+if os.path.exists(tlsql_path_in_parent):
+    # Normal case: parent_dir contains tlsql/__init__.py
+    sys_path_dir = parent_dir
+    print(f"Using parent_dir as sys.path: {sys_path_dir}")
+elif os.path.exists(tlsql_path_in_tlsql_dir) and os.path.exists(tlsql_tlsql_path):
+    # tlsql_dir is the project root (contains both tlsql/__init__.py and tlsql/tlsql/__init__.py)
+    sys_path_dir = tlsql_dir
+    print(f"Using tlsql_dir as sys.path (project root): {sys_path_dir}")
+else:
+    # Fallback: try tlsql_dir anyway
+    sys_path_dir = tlsql_dir
+    print(f"Warning: Could not find tlsql/__init__.py in expected locations")
+    print(f"Using tlsql_dir as fallback: {sys_path_dir}")
+
+# Add sys_path_dir to sys.path at the beginning to ensure it's checked first
+# This ensures that 'import tlsql' imports from the local code, not installed package
+if sys_path_dir in sys.path:
+    sys.path.remove(sys_path_dir)
+sys.path.insert(0, sys_path_dir)
+print(f"Added to sys.path[0]: {sys_path_dir}")
 
 # Initialize autodoc_mock_imports early so we can add to it if import fails
 # This will be used later in the configuration
