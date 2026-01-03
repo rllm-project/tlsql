@@ -19,146 +19,49 @@ import sys
 tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
 
-# Determine the correct path for importing tlsql
-# Check if tlsql_dir itself contains __init__.py (meaning tlsql is the package root)
-tlsql_init_in_dir = os.path.join(tlsql_dir, '__init__.py')
-tlsql_init_in_parent = os.path.join(parent_dir, 'tlsql', '__init__.py')
-
-# Determine which path to use
-if os.path.exists(tlsql_init_in_dir):
-    # tlsql_dir is the package root (tlsql/__init__.py exists)
-    # So parent_dir should be in sys.path to import tlsql
-    source_path = parent_dir
-    print(f"Detected tlsql package structure: {tlsql_dir} contains __init__.py")
-elif os.path.exists(tlsql_init_in_parent):
-    # tlsql is a subdirectory of parent_dir
-    source_path = parent_dir
-    print(f"Detected tlsql package structure: {tlsql_init_in_parent} exists")
-else:
-    # Fallback: use parent_dir
-    source_path = parent_dir
-    print(f"Warning: Could not find tlsql/__init__.py, using fallback path: {source_path}")
-
-# Add source_path to sys.path if not already there
-if source_path not in sys.path:
-    sys.path.insert(0, source_path)
-    print(f"Added to sys.path: {source_path}")
+# Only add parent_dir to sys.path (not tlsql_dir)
+# This ensures that 'import tlsql' imports tlsql/__init__.py (which has convert)
+# and 'import tlsql.tlsql' imports tlsql/tlsql/__init__.py
+# If we add tlsql_dir to sys.path, 'import tlsql' would import tlsql/tlsql/__init__.py instead
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 # Ensure tlsql can be imported for viewcode extension
 # Force reload to ensure we're using the local version
+tlsql_available = False
 try:
-    # First, try to uninstall any installed version to avoid conflicts
-    import subprocess
-    print("Checking for installed tlsql package...")
-    try:
-        result = subprocess.run(
-            [sys.executable, '-m', 'pip', 'show', 'tlsql'],
-            capture_output=True,
-            text=True
-        )
-        if result.returncode == 0:
-            print("Found installed tlsql package, uninstalling...")
-            subprocess.check_call(
-                [sys.executable, '-m', 'pip', 'uninstall', '-y', 'tlsql'],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
-            print("Uninstalled installed tlsql package")
-    except:
-        print("No installed tlsql package found or uninstall failed (this is OK)")
-    
     # Remove tlsql from sys.modules if it exists to force reload
-    modules_to_remove = [key for key in list(sys.modules.keys()) if key.startswith('tlsql')]
-    for module_name in modules_to_remove:
-        del sys.modules[module_name]
+    if 'tlsql' in sys.modules:
+        del sys.modules['tlsql']
+    if 'tlsql.tlsql' in sys.modules:
+        del sys.modules['tlsql.tlsql']
+    if 'tlsql.tlsql.sql_generator' in sys.modules:
+        del sys.modules['tlsql.tlsql.sql_generator']
     
-    # Verify source code path exists
-    tlsql_source_init = os.path.join(tlsql_dir, '__init__.py')
-    tlsql_source_init_parent = os.path.join(parent_dir, 'tlsql', '__init__.py')
-    
-    if os.path.exists(tlsql_source_init):
-        print(f"Found source code at: {tlsql_source_init}")
-        # Ensure source_path (parent_dir) is first in sys.path
-        if source_path in sys.path:
-            sys.path.remove(source_path)
-        sys.path.insert(0, source_path)
-    elif os.path.exists(tlsql_source_init_parent):
-        print(f"Found source code at: {tlsql_source_init_parent}")
-        # Ensure source_path (parent_dir) is first in sys.path
-        if source_path in sys.path:
-            sys.path.remove(source_path)
-        sys.path.insert(0, source_path)
-    else:
-        print(f"Warning: Could not find tlsql/__init__.py at expected locations")
-        print(f"  Checked: {tlsql_source_init}")
-        print(f"  Checked: {tlsql_source_init_parent}")
-        print(f"  Using source_path: {source_path}")
-        print(f"  sys.path contains: {[p for p in sys.path if 'tlsql' in p or p == source_path]}")
-    
-    # Now try to import tlsql
     import tlsql
-    print(f"✓ Successfully imported tlsql from: {tlsql.__file__}")
-    
-    # Verify we're using source code
-    actual_path = os.path.abspath(tlsql.__file__)
-    if os.path.exists(tlsql_source_init):
-        expected_path = os.path.abspath(tlsql_source_init)
-    else:
-        expected_path = os.path.abspath(tlsql_source_init_parent)
-    
-    if actual_path != expected_path:
-        print(f"Warning: Imported from {actual_path}, expected {expected_path}")
-    else:
-        print(f"✓ Confirmed using source code version")
-    
-    # Try to import submodules, but don't fail if they don't exist
-    try:
-        import tlsql.tlsql
-        print("✓ Successfully imported tlsql.tlsql submodule")
-    except ImportError as e:
-        print(f"Warning: Could not import tlsql.tlsql submodule: {e}")
-    
-    try:
-        import tlsql.tlsql.ast_nodes  # Test import
-        print("✓ Successfully imported tlsql.tlsql.ast_nodes")
-    except ImportError as e:
-        print(f"Warning: Could not import tlsql.tlsql.ast_nodes: {e}")
+    import tlsql.tlsql
+    import tlsql.tlsql.ast_nodes  # Test import
     
     # Test that convert function exists
     if not hasattr(tlsql, 'convert'):
         print(f"Warning: tlsql module does not have 'convert' attribute")
-        if hasattr(tlsql, '__file__'):
-            print(f"tlsql module location: {tlsql.__file__}")
+        print(f"tlsql module location: {tlsql.__file__}")
         print(f"tlsql module attributes: {dir(tlsql)}")
     else:
-        print(f"✓ Successfully imported tlsql.convert")
-    
-except ImportError as import_err:
-    error_msg = str(import_err)
-    print(f"Import error: {error_msg}")
-    
-    if 'FilterCondition' in error_msg:
-        print("Detected FilterCondition import error - this should be handled by uninstall above")
-    
-    # Print debug information
-    print(f"Debug info:")
-    print(f"  tlsql_dir: {tlsql_dir}")
-    print(f"  parent_dir: {parent_dir}")
-    print(f"  source_path: {source_path}")
-    print(f"  tlsql_dir/__init__.py exists: {os.path.exists(os.path.join(tlsql_dir, '__init__.py'))}")
-    print(f"  parent_dir/tlsql/__init__.py exists: {os.path.exists(os.path.join(parent_dir, 'tlsql', '__init__.py'))}")
-    print(f"  sys.path (first 5): {sys.path[:5]}")
-    
-    # Don't fail the build, just print warning
-    print("Warning: Could not import tlsql - documentation may be incomplete")
+        print(f"✓ Successfully imported tlsql.convert from {tlsql.__file__}")
+        tlsql_available = True
+except ImportError as e:
+    # Print error for debugging but don't fail the build
+    print(f"Warning: Could not import tlsql: {e}")
+    print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()
-    tlsql = None  # Set to None so autodoc can still work
 except Exception as e:
-    print(f"Unexpected error during tlsql import setup: {e}")
+    # Catch any other errors during import
+    print(f"Warning: Unexpected error importing tlsql: {e}")
+    print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()
-    tlsql = None
 
 # -- Project information -----------------------------------------------------
 

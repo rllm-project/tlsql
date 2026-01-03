@@ -13,5 +13,6 @@ python:
     - requirements: doc/requirements.txt
     - method: pip
       path: .
+      upgrade: true
 
 formats: []
