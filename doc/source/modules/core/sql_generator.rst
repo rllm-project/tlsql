@@ -1,8 +1,9 @@
 SQL Generator
 =============
 
-The SQL Generator converts parsed TLSQL AST into standard SQL statements. It provides the main
-conversion function :func:`tlsql.convert` and supporting classes for representing results.
+The SQL Generator module contains the core SQL generation functionality for TLSQL.
+The main :func:`tlsql.convert` API function uses these classes internally to convert
+TLSQL statements into standard SQL with full metadata.
 
 Example
 -------
@@ -20,25 +21,34 @@ Example
         for sql_obj in result.sql_list:
             print(f"SQL: {sql_obj.sql}")
 
-Main Function
-~~~~~~~~~~~~~
+Main API
+~~~~~~~~
+
+The main conversion functionality is provided through the global :func:`tlsql.convert` function.
 
 .. autofunction:: tlsql.convert
 
-Core Classes
-~~~~~~~~~~~~
+SQL Generator Class
+~~~~~~~~~~~~~~~~~~~
+
+The :class:`SQLGenerator` class provides the core SQL generation functionality:
 
 .. autoclass:: tlsql.tlsql.sql_generator.SQLGenerator
-   :no-members:
-   :no-inherited-members:
+   :members: convert
+   :undoc-members:
    :show-inheritance:
+
+Result Classes
+~~~~~~~~~~~~~~
 
 .. autoclass:: tlsql.tlsql.sql_generator.ConversionResult
-   :no-members:
-   :no-inherited-members:
+   :members:
+   :undoc-members:
    :show-inheritance:
+   :noindex:
 
 .. autoclass:: tlsql.tlsql.sql_generator.GeneratedSQL
-   :no-members:
-   :no-inherited-members:
+   :members:
+   :undoc-members:
    :show-inheritance:
+   :noindex:

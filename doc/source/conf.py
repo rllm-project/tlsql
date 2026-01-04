@@ -12,33 +12,56 @@
 #
 import os
 import sys
-import inspect
 
-# Add the project root to the path so we can import tlsql
-# In ReadTheDocs, the package is installed via pip install, so we need to ensure
-# the source directory is in the path for development builds
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+# Configure sys.path for correct tlsql package import
+# CRITICAL: The issue is that Python finds tlsql/tlsql/__init__.py instead of tlsql/__init__.py
+# Solution: Add the PARENT directory to sys.path, not the tlsql directory itself
 
-# For ReadTheDocs builds, rely on the installed package
-# For local builds, add the project root to find the source
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
+import os
+import sys
 
-# Also add the tlsql directory itself to ensure we can import during development
-tlsql_dir = os.path.join(project_root, 'tlsql')
-if tlsql_dir not in sys.path:
-    sys.path.insert(0, tlsql_dir)
+# Get the parent directory that contains the tlsql package
+# conf.py is in tlsql/doc/source/, so parent dir contains tlsql/
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
+
+# FORCE the parent directory to be FIRST in sys.path
+# This way, 'import tlsql' finds tlsql/__init__.py in the parent directory
+if parent_dir in sys.path:
+    sys.path.remove(parent_dir)
+sys.path.insert(0, parent_dir)
+
+# Remove the tlsql directory itself if it's in sys.path (prevents confusion)
+tlsql_dir = os.path.join(parent_dir, 'tlsql')
+while tlsql_dir in sys.path:
+    sys.path.remove(tlsql_dir)
+
+# Also remove the subdir to be extra safe
+tlsql_subdir = os.path.join(tlsql_dir, 'tlsql')
+while tlsql_subdir in sys.path:
+    sys.path.remove(tlsql_subdir)
+
+print(f"DEBUG: parent_dir = {parent_dir}")
+print(f"DEBUG: tlsql_dir = {tlsql_dir}")
+print(f"DEBUG: sys.path[0] = {sys.path[0]}")
+print(f"DEBUG: tlsql_dir in sys.path = {tlsql_dir in sys.path}")
+print(f"DEBUG: tlsql_subdir in sys.path = {tlsql_subdir in sys.path}")
 
 # Ensure tlsql can be imported for viewcode extension
 # Force reload to ensure we're using the local version
 tlsql_available = False
 try:
-    # Remove tlsql from sys.modules if it exists to force reload
-    modules_to_remove = [
-        'tlsql', 'tlsql.tlsql', 'tlsql.tlsql.sql_generator',
-        'tlsql.tlsql.ast_nodes', 'tlsql.tlsql.exceptions'
-    ]
+    # Aggressively clear ALL tlsql-related modules from cache
+    modules_to_remove = []
+    for mod_name in list(sys.modules.keys()):
+        if mod_name.startswith('tlsql'):
+            modules_to_remove.append(mod_name)
+
     for mod in modules_to_remove:
+        del sys.modules[mod]
+
+    # Also clear any modules that might conflict
+    conflict_modules = ['tlsql.tlsql', 'tlsql.core', 'core.tlsql']
+    for mod in conflict_modules:
         if mod in sys.modules:
             del sys.modules[mod]
 
@@ -51,30 +74,21 @@ try:
         print(f"Warning: tlsql module does not have 'convert' attribute")
         print(f"tlsql module location: {tlsql.__file__}")
         print(f"Available attributes: {[attr for attr in dir(tlsql) if not attr.startswith('_')]}")
-        print(f"sys.path: {sys.path}")
+        print(f"DEBUG: parent_dir = {parent_dir}")
+        print(f"DEBUG: tlsql_dir = {tlsql_dir}")
+        print(f"DEBUG: sys.path[0] = {sys.path[0]}")
     else:
         print(f"✓ Successfully imported tlsql.convert from {tlsql.__file__}")
-        # Test that the function is callable
-        try:
-            # Just check signature, don't actually call it
-            sig = inspect.signature(tlsql.convert)
-            print(f"✓ convert function signature: {sig}")
-            tlsql_available = True
-        except Exception as sig_error:
-            print(f"Warning: Could not get convert function signature: {sig_error}")
+        tlsql_available = True
 except ImportError as e:
     # Print error for debugging but don't fail the build
     print(f"Warning: Could not import tlsql: {e}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(f"sys.path: {sys.path}")
     print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()
 except Exception as e:
     # Catch any other errors during import
     print(f"Warning: Unexpected error importing tlsql: {e}")
-    print(f"Current working directory: {os.getcwd()}")
-    print(f"sys.path: {sys.path}")
     print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()

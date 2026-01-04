@@ -36,8 +36,16 @@ def convert(tlsql: str):
         ConversionResult: Unified result containing statement type and all metadata.
 
     """
+    from tlsql.tlsql.parser import Parser
     from tlsql.tlsql.sql_generator import SQLGenerator
-    return SQLGenerator.convert(tlsql)
+
+    # Parse the TLSQL statement
+    parser = Parser(tlsql)
+    ast = parser.parse()
+
+    # Generate SQL with metadata
+    generator = SQLGenerator()
+    return generator.generate_with_metadata(ast)
 
 
 # Tokens
@@ -49,7 +57,6 @@ from tlsql.tlsql.parser import Parser
 from tlsql.tlsql.sql_generator import (
     SQLGenerator,
     GeneratedSQL,
-    FilterCondition,
     ConversionResult,
 )
 
@@ -95,7 +102,6 @@ __all__ = [
     "Parser",
     "SQLGenerator",
     "GeneratedSQL",
-    "FilterCondition",
     "ConversionResult",
     # AST nodes
     "ASTNode",
