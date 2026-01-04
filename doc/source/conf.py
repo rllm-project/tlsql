@@ -12,53 +12,69 @@
 #
 import os
 import sys
+import inspect
 
 # Add the project root to the path so we can import tlsql
-# conf.py is in doc/source/, so go up two levels to reach tlsql/ directory
-# Then go up one more level to reach the parent directory that contains tlsql/
-tlsql_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-parent_dir = os.path.abspath(os.path.join(tlsql_dir, '..'))
+# In ReadTheDocs, the package is installed via pip install, so we need to ensure
+# the source directory is in the path for development builds
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
-# Only add parent_dir to sys.path (not tlsql_dir)
-# This ensures that 'import tlsql' imports tlsql/__init__.py (which has convert)
-# and 'import tlsql.tlsql' imports tlsql/tlsql/__init__.py
-# If we add tlsql_dir to sys.path, 'import tlsql' would import tlsql/tlsql/__init__.py instead
-if parent_dir not in sys.path:
-    sys.path.insert(0, parent_dir)
+# For ReadTheDocs builds, rely on the installed package
+# For local builds, add the project root to find the source
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+# Also add the tlsql directory itself to ensure we can import during development
+tlsql_dir = os.path.join(project_root, 'tlsql')
+if tlsql_dir not in sys.path:
+    sys.path.insert(0, tlsql_dir)
 
 # Ensure tlsql can be imported for viewcode extension
 # Force reload to ensure we're using the local version
 tlsql_available = False
 try:
     # Remove tlsql from sys.modules if it exists to force reload
-    if 'tlsql' in sys.modules:
-        del sys.modules['tlsql']
-    if 'tlsql.tlsql' in sys.modules:
-        del sys.modules['tlsql.tlsql']
-    if 'tlsql.tlsql.sql_generator' in sys.modules:
-        del sys.modules['tlsql.tlsql.sql_generator']
-    
+    modules_to_remove = [
+        'tlsql', 'tlsql.tlsql', 'tlsql.tlsql.sql_generator',
+        'tlsql.tlsql.ast_nodes', 'tlsql.tlsql.exceptions'
+    ]
+    for mod in modules_to_remove:
+        if mod in sys.modules:
+            del sys.modules[mod]
+
     import tlsql
     import tlsql.tlsql
     import tlsql.tlsql.ast_nodes  # Test import
-    
+
     # Test that convert function exists
     if not hasattr(tlsql, 'convert'):
         print(f"Warning: tlsql module does not have 'convert' attribute")
         print(f"tlsql module location: {tlsql.__file__}")
-        print(f"tlsql module attributes: {dir(tlsql)}")
+        print(f"Available attributes: {[attr for attr in dir(tlsql) if not attr.startswith('_')]}")
+        print(f"sys.path: {sys.path}")
     else:
         print(f"✓ Successfully imported tlsql.convert from {tlsql.__file__}")
-        tlsql_available = True
+        # Test that the function is callable
+        try:
+            # Just check signature, don't actually call it
+            sig = inspect.signature(tlsql.convert)
+            print(f"✓ convert function signature: {sig}")
+            tlsql_available = True
+        except Exception as sig_error:
+            print(f"Warning: Could not get convert function signature: {sig_error}")
 except ImportError as e:
     # Print error for debugging but don't fail the build
     print(f"Warning: Could not import tlsql: {e}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"sys.path: {sys.path}")
     print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()
 except Exception as e:
     # Catch any other errors during import
     print(f"Warning: Unexpected error importing tlsql: {e}")
+    print(f"Current working directory: {os.getcwd()}")
+    print(f"sys.path: {sys.path}")
     print("Documentation will be built, but autodoc features may be limited.")
     import traceback
     traceback.print_exc()
