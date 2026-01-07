@@ -124,7 +124,7 @@ def main():
         target_table, non_table_embeddings, adj, emb_size, train_mask, val_mask, test_mask, device=device
     )
 
-    # Final comparison table
+    # Final comparison
     print(f"\n{'Method':<20} {'Train Acc':<15} {'Val Acc':<15} {'Test Acc':<15}")
     print(f"{'='*65}")
     print(f"{'Random Guess':<20} {random_train_acc:<15.4f} {random_val_acc:<15.4f} {random_test_acc:<15.4f}")

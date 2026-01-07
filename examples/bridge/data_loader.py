@@ -46,4 +46,4 @@ def prepare_data_from_tlsql(train_tlsql, validate_tlsql, predict_tlsql, db_confi
         train_data, validate_data, test_df, predict_sqls.target_column, device
     )
 
-    return target_table, non_table_embeddings, adj, non_table_embeddings.size(1) if non_table_embeddings is not None else 128
+    return target_table, non_table_embeddings, adj, non_table_embeddings.size(1) 

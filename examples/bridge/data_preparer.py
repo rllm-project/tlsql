@@ -20,13 +20,15 @@ def prepare_bridge_data(
     device: torch.device = None,
 ):
     """Prepare data for BRIDGE model"""
+    emb_size = 128  # Embedding dimension
+    target_pkey = 'UserID' #primary key
+    
     table_name, col_name = target_column.split('.')
 
     train_df = train_data[table_name]
     validate_df = validate_data[table_name] if validate_data else None
     test_df = test_data if test_data is not None else None
 
-    target_pkey = 'UserID'
     all_dfs = [df for df in [train_df, validate_df, test_df] if df is not None]
     common_cols = set.intersection(*[set(df.columns) for df in all_dfs])
     target_df = pd.concat([df[list(common_cols)] for df in all_dfs], ignore_index=True).set_index(target_pkey)
@@ -68,7 +70,6 @@ def prepare_bridge_data(
     relation_df['MovieID'] = relation_df[tgt_col].map(movie_id_map)
     relation_df = relation_df[relation_df['UserID'].notna() & relation_df['MovieID'].notna()][['UserID', 'MovieID']]
 
-    emb_size = 128
     movie_embeddings = torch.randn(len(unique_movies), emb_size)
     graph = build_homo_graph(relation_df, n_all=len(target_table) + len(unique_movies))
 

@@ -47,10 +47,10 @@ def test():
     print(f"Target Table: {predict_sqls.target_table}")
     print(f"WHERE Condition: {predict_sqls.where_condition}")
     print("\nGenerated Standard SQL:")
-    if predict_sqls.where_condition:
-        print(f"SELECT * FROM {predict_sqls.target_table} WHERE {predict_sqls.where_condition}")
-    else:
-        print(f"SELECT * FROM {predict_sqls.target_table}")
+    for i, gen_sql in enumerate(predict_sqls.sql_list, 1):
+        print(f"{i}. Table: {gen_sql.table}")
+        print(f"   SQL: {gen_sql.sql}")
+        
 
 
 def validate():
