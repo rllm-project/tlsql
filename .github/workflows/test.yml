@@ -7,6 +7,7 @@ on:
       - master
     paths:
       - "examples/**"
+      - "tests/**"
       - "tlsql/**"
       - "setup.py"
       - "requirements.txt"
@@ -17,6 +18,7 @@ on:
       - master
     paths:
       - "examples/**"
+      - "tests/**"
       - "tlsql/**"
       - "setup.py"
       - "requirements.txt"
@@ -48,3 +50,10 @@ jobs:
         working-directory: ./examples
         run: |
           python sql_conversion.py
+
+      - name: Run Unit Tests
+        working-directory: ./tests
+        run: |
+          python lexer_test.py
+          python parser_test.py
+          python test_predict_statements.py
