@@ -13,13 +13,6 @@
 import os
 import sys
 
-# Configure sys.path for correct tlsql package import
-# CRITICAL: The issue is that Python finds tlsql/tlsql/__init__.py instead of tlsql/__init__.py
-# Solution: Add the PARENT directory to sys.path, not the tlsql directory itself
-
-import os
-import sys
-
 # Get the parent directory that contains the tlsql package
 # conf.py is in tlsql/docs/source/, so parent dir contains tlsql/
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..'))
@@ -30,7 +23,7 @@ if parent_dir in sys.path:
     sys.path.remove(parent_dir)
 sys.path.insert(0, parent_dir)
 
-# Remove the tlsql directory itself if it's in sys.path (prevents confusion)
+
 tlsql_dir = os.path.join(parent_dir, 'tlsql')
 while tlsql_dir in sys.path:
     sys.path.remove(tlsql_dir)
@@ -64,25 +57,11 @@ try:
     import tlsql.tlsql.ast_nodes  # Test import
 
     # Test that convert function exists
-    if not hasattr(tlsql, 'convert'):
-        print(f"Warning: tlsql module does not have 'convert' attribute")
-        print(f"tlsql module location: {tlsql.__file__}")
-        print(f"Available attributes: {[attr for attr in dir(tlsql) if not attr.startswith('_')]}")
-    else:
-        print(f"✓ Successfully imported tlsql.convert from {tlsql.__file__}")
+    if hasattr(tlsql, 'convert'):
         tlsql_available = True
-except ImportError as e:
-    # Print error for debugging but don't fail the build
-    print(f"Warning: Could not import tlsql: {e}")
-    print("Documentation will be built, but autodoc features may be limited.")
-    import traceback
-    traceback.print_exc()
-except Exception as e:
-    # Catch any other errors during import
-    print(f"Warning: Unexpected error importing tlsql: {e}")
-    print("Documentation will be built, but autodoc features may be limited.")
-    import traceback
-    traceback.print_exc()
+except (ImportError, Exception):
+    # Silently handle import errors - documentation will be built, but autodoc features may be limited
+    pass
 
 # -- Project information -----------------------------------------------------
 

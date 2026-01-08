@@ -1,6 +1,6 @@
 """TLSQL to Standard SQL Conversion Example
 
-This example demonstrates how TLSQL statements are converted to standard SQL.
+The demo uses the TML1M dataset with three relational tables: users, movies, and ratings.
 """
 
 import tlsql

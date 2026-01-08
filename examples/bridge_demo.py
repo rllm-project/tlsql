@@ -1,6 +1,6 @@
 """BRIDGE Model Demo with TLSQL.
 
-This work is conducted on the TML1M dataset from SJTUTables, a dataset of users, movies, and ratings.
+The demo uses the TML1M dataset with three relational tables: users, movies, and ratings.
 """
 
 import torch

@@ -5,7 +5,7 @@ Demonstrates three-level logic for TLSQL statements:
 - Level II: PREDICT + TRAIN (TRAIN optional)
 - Level III: PREDICT + TRAIN + VALIDATE (both TRAIN and VALIDATE optional)
 
-This work is conducted on the TML1M dataset from SJTUTables, a dataset of users, movies, and ratings.
+The demo uses the TML1M dataset with three relational tables: users, movies, and ratings.
 """
 
 
